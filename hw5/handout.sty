@@ -1,0 +1,121 @@
+% -----------------------------*- LaTeX -*------------------------------
+%
+%   handout.sty -- definitions for notes, class handouts, homeworks,
+%   		   exams, and so forth.
+%
+% ----------------------------------------------------------------------
+
+% set one-inch margins all around, NOT counting the headers and footers
+\RequirePackage[margin=1in]{geometry}
+
+% use color
+\RequirePackage[dvipsnames,usenames]{color}
+
+\definecolor{Hilite}{cmyk}{0,0.2,0,0}
+\definecolor{LightYellow}{cmyk}{0,0,0.2,0}
+\definecolor{Lightgray}{cmyk}{0,0,0,0.3}
+\def\hilite#1{\colorbox{Hilite}{#1}}
+
+%
+%  \headers{left}{middle}{right} -- set up boldface underlined headers
+%	left	-- left header item
+%	middle	-- middle header item
+%	right	-- right header item
+%  
+%  \headers{CS 170}{Final Exam}{Fall 1992}
+%  \headers{CS 277}{Homework 1 (9/15/92)}{Jeff Erickson}
+%
+\newcommand{\headers}[3]{
+   \newpage\setcounter{page}{1}
+   \def\@oddhead{$\underline{\hbox to\textwidth{%
+	\textbf{\rlap{#1}\phantom{hj}\hfill #2 \hfill \llap{#3}}}}$}
+   \def\@oddfoot{\hfill\thepage\hfill}
+}
+
+
+%
+%  shadowbox sets enclosed text in a gray rectangle with a black border
+%  boxquote is a centered shadowbox with small sans-serif text
+%
+\definecolor{Shadow}{cmyk}{0,0,0,0.025}
+\newenvironment{shadowbox}[1]%
+   {\begin{lrbox}{\@tempboxa}\begin{minipage}{#1\columnwidth}}
+   {\end{minipage}\end{lrbox}\fcolorbox{black}{Shadow}{\usebox{\@tempboxa}}}
+
+\newenvironment{boxquote}[1]
+	{\begin{center}\small\sf\begin{shadowbox}{#1}}
+	{\end{shadowbox}\end{center}}
+
+%
+%  ``Problems'' environment.  Just like ``enumerate'', but indent second and
+%  succeeding paragraphs in each item, and separate items a little more.
+%
+\newlength\tmplen
+\newcounter{probnum}[section]
+\newenvironment{problems}
+{\tmplen=\parindent\begin{enumerate}\parindent=\tmplen\itemsep=3ex plus 0.1fil}
+{\setcounter{probnum}{\theenumi}\end{enumerate}}
+
+%
+%  Solution environment.
+%
+\newproof{solution}{\normalsize Solution}(\normalsize\rm\parindent1.5em)[\markatright{$\blacksquare$}]
+
+%
+%  Rubric environment.
+%
+\newproof{RuBrIc}{\color{BrickRed}\small\sffamily Rubric}(\color{BrickRed}\small\sf\parindent1.5em)
+
+\newenvironment{rubrish}%
+   {\begin{center}\begin{lrbox}{\@tempboxa}\begin{minipage}{5in}}
+   {\end{minipage}\end{lrbox}\fcolorbox{BrickRed}{White}{\usebox{\@tempboxa}}\end{center}}
+
+\newenvironment{rubric}{\begin{rubrish}\begin{RuBrIc}}{\end{RuBrIc}\end{rubrish}}
+
+%
+%  \hidesolutions does just what it sounds like.
+%
+\RequirePackage{verbatim}
+\def\hidesolutions{\let\soln\comment\let\endsoln\endcomment
+\let\solution\comment\let\endsolution\endcomment} 
+
+%
+%  Add stars and other marks in front of enumerated items.
+%
+\def\itemstars{}
+\def\itemding{}
+\def\resetmarks{\xdef\itemding{}\xdef\itemstars{}}
+\def\Hard{\def\itemstars{\boldmath $^\star$}}
+\def\ReallyHard{\def\itemstars{$^\bigstar$}}
+\def\ReallyReallyHard{\def\itemstars{{\Large$\bigstar$}}}
+
+\def\Hint#1{\textsl{[Hint: #1]}}
+\def\labelenumi{\llap{\itemding\itemstars}\theenumi.\resetmarks}
+\def\labelenumii{\llap{\itemding\itemstars}(\theenumii)\resetmarks}
+
+%
+%  Flag advanced sections and subsections; hack using \marginpar
+%
+\reversemarginpar
+\@mparswitchfalse
+\def\SectFlag#1{\marginpar{\hfill\rlap{\hspace{\marginparsep}\llap{#1}}}}
+\def\Ouch#1{\SectFlag{#1\boldmath$^\star$}}
+\pdfstringdefDisableCommands{\let\Ouch\relax} % allow \OUCH in section titles
+\def\hardsubsection#1{\subsection{\protect\Ouch{\large}#1}}
+\def\hardsection#1{\section{\protect\Ouch{\Large}#1}}
+
+% redefine \note (from jeffe.sty) to be always on the left
+% Doesn't work.
+\def\n@ten@te#1{\SectFlag{\textcolor{red}{\textcircled{\footnotesize #1}$\!\Longrightarrow$}}}
+
+%
+%  ``Exercise'' environment (for course notes)
+%
+\newproof{exercise}{Exercise}
+
+%
+%  Inline figure environment
+%
+%\newenvironment{inline}{\begin{center}\footnotesize\sf}{\end{center}}
+\newenvironment{inline}{\begin{figure}[ht]\centering\footnotesize\sf}{\end{figure}}
+
