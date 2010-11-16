@@ -131,9 +131,70 @@ Describe an efficient algorithm that either rounds $A$ in this fashion, or
 reports correctly that no such rounding is possible.
 
 \begin{solution}
-  test
+  We can solve this problem by reducing it to maximum flows problem 
+  with edge demands.
+  Before we do that, 
+  we first check if the sum of each row (or column)
+  is an integer. If not, we report that no such rounding is possible. 
+  This is because after rounding, the sum of each row (or column) must be an
+  integer.
+  
+  Now we assume the sum of each row (or column) is an integer.
+  Let $R[1..m]$ be the sum of each row, and $C[1..n]$ be the sum of each column.
+  We construct a graph $G$ with vertex set $\{s,t\} \cup U \cup V \cup W$ as follows:
+  \begin{itemize}
+    \item Each element $A[i][j]$ is a node $x_{ij}$ in $U$.
+    \item Each row $i$  is a node $r_i$ in $V$.
+    \item Each column $j$  is a node $c_i$ in $W$.
+  \end{itemize}
+
+  The edges consists of:
+  \begin{itemize}
+    \item an edge $e: s \rightarrow x_{ij}$ with capacity $c(e)=\lceil x_{ij}
+      \rceil$ and demand $d(e) = \lfloor x_{ij} \rfloor$ for each $x_{ij} \in U$.  
+    \item an edge $e: x_{ij}\rightarrow r_i$ with capacity $c(e)=\infty$ and
+      demand $d(e)=0$ for each $r_i \in V$.
+    \item
+      an edge $e: x_{ij} \rightarrow c_j$ with capacity $c(e)=\infty$ and
+      demand $d(e)=0$ for each $c_i \in W$.
+    \item an edge $e: r_i \rightarrow t$ with capacity $c(e)=d(e)=R[i]$ 
+      for each $r_i \in V$.
+    \item an edge $e: c_j \rightarrow t$ with capacity $c(e)=d(e)=C[j]$ 
+      for each $c_j \in W$.
+  \end{itemize} 
+
+  \begin{theorem}
+    The rounding exists if and only if there is a maximum flow that saturates
+    every edge entering $t$. The rounding scheme consists of 
+    the flow values that leave from $s$.
+  \end{theorem}
+  \begin{proof}
+    If we know a correct rounding scheme, we can transform it to a feasible
+    flow in $G$. For each $x_{ij}=A[i][j]$, we push the same amount of flow to
+    edge $s \rightarrow x_{ij}$. Since $x_{ij}$ can only be rounded to $\lfloor
+    x_{ij} \rfloor$ or $\lceil x_{ij} \rceil$, clearly the values satisfy the
+    edge constraints of these edges.  Moreover, since this is a valid rouding
+    scheme, the sum of rows and columns will be exactly the same as the flow
+    value on edges $r_i \rightarrow t$ or $c_j \rightarrow t$, which means
+    these edges are saturated and thus it is a maximum flow.
+
+    Conversely, if we have a maximum flow that saturates every edge entering
+    $t$, we can round each element $A[i][j]=f(e)$, where $e$ is the edge
+    $s\rightarrow  x_{ij}$. The flow value $f(e)$ satisfies 
+    $d(e) \leq f(e) \leq c(e)$. Thus, each entry $x_{ij}=A[i][j]$ is rounded
+    correctly to $\lfloor x_{ij} \rfloor$ or $\lceil x_{ij} \rceil$.
+    Finally, the sum of rows and columns are the same as the 
+    corresponding capacity (or demand) values in edges $r_i \rightarrow t$ and 
+    $c_j \rightarrow t$. Since all these edges are saturated, the sum of entries
+    in any row or column are unchanged.
+    Thus, it is a valid rounding scheme.
+  \end{proof}
+
+  Clearly, there are $O(mn)$ vertices  and $O(mn)$ edges in $G$.
+  Computing the sums and constructing the graph can be done in $O(mn)$ time.
+  If we use Edmonds-Karp fat-pipe algorithm, we get an overall running time of 
+  $O(VE^2)=O(m^3n^3)$.
 \end{solution}
-% ---------------------------------------------------------
 
 % ---------------------------------------------------------
 \newprob
@@ -146,8 +207,49 @@ schedule must obey both Federal laws and individual voters' budget constraints.
 If no such schedule exists, your algorithm should report that fact.
 
 \begin{solution}
-  test
+  Suppose there are $k$ days left from now to the election, there are $c$
+  candidates and $v$ voters.  Let $M[1..c]$ be the money that must be spent on
+  each candidate, $W[1..v][1..c]$ be the amounts that each voter is willing to
+  donate to each candidate $A[1..v]$ be the total amounts that each voter is
+  able to donate to all candidates.
+  We can model this problem as a maximum flow problem.
+  We construct a flow network $G=(V,E)$ with vertices $X \cup Y \cup \{s,t\}$,
+  where each node in $X$ and $Y$ denotes a voter and a candidate, respectively.
+  The edges consist of:
+  \begin{itemize}
+    \item an edge $s \rightarrow x$ with capacity $\min\{100, A[x]/k\}$ for
+      each $x\in X$.
+    \item an edge $y \rightarrow t$ with capacity $M[y]/k$ for each $y \in Y$.
+    \item an edge $x \rightarrow y$ with capacity $W[x][y]/k$ for each $x\in X$
+      and $y \in Y$.
+  \end{itemize}
+
+  \begin{theorem}
+    The donation schedule exists if and only if there is a maximum flow that 
+    saturates every edge entering $t$. The money that each voter should spend
+    to each candidate on every day is denoted by the edges $x \rightarrow y$
+    for each $x\in X$ and $y \in Y$.
+  \end{theorem}
+
+  \begin{proof}
+    For each edge $s \rightarrow x$ for each $x \in X$, clearly it satisfies
+    both Federal lasw and individual voters' budget constraints.
+    For each edges $x \rightarrow y$, it denotes the amount that voter $x$ 
+    will send to candidate $y$ each day.
+    For each edge $y \rightarrow t$ for each $y \in Y$, it denotes the amount 
+    that every candidate must receive each day to meet the campaign
+    requirement.
+    If the maximum flow we compute saturates all the edges entering $t$,
+    then following this schedule, after $k$ days each candidate can receive 
+    exactly $M[y]$ money for all $y \in Y$.
+    Hence, the maximum flow we compute is the desired schedule.
+  \end{proof}
+
+  The maximum flow has value at most $S=\sum_y M[y]$. There at most 
+  $v + v \cdot c + c = O(vc)$ edges. Thus, Ford-Fulkerson algorithm
+  runs in $O(Svc)$ time.
 \end{solution}
+
 % ---------------------------------------------------------
 \newprob
 
@@ -157,17 +259,32 @@ If no such schedule exists, your algorithm should report that fact.
 Prove that this greedy strategy does not always compute an optimal solution.
 
 \begin{solution}
-  test
+  We prove by giving a counterexample. As in the following figure, 
+  the blue cells are marked. Both of the 2-bend and 3-bend paths contains 
+  maximum number of marked cells. However, if we choose the 2-bend path 
+  at the first iteration, we need another two monotone path to cover all the
+  cells. On the other hand, choosing the 3-bend path at first can finish 
+  marking the cells with only two paths.
+  \begin{center}
+    \includegraphics[width=.1\textheight]{p4}
+  \end{center}
 \end{solution}
 
 \item
 Describe and analyze an efficient algorithm to compute the smallest set of
 monotone paths that covers every marked cell. The input to your algorithm is an
-array $M[1..n,1..n]$ of booleans, where $M[i, j]$ = TRUE if and only if cell
+array $M[1..n,1..n]$ of booleans, where $M[i, j]$ = True if and only if cell
 $(i, j)$ is marked.
 
 \begin{solution}
-  test
+  Dynamic programming to construct the graph $G$.
+  Maximum flow with unit demand and cost on each edge.
+  $d=1$ means each node must be used.
+  $\$=1$ means the more paths are used, the more cost there will be,
+  because all flows are sent from $s$.
+  \begin{proof}
+    Minimum set of monotone paths $\rightarrow$ minimum cost flow.
+  \end{proof}
 \end{solution}
 
 \end{enumerate}
