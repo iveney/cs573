@@ -76,14 +76,15 @@ Describe and analyze an algorithm to nest the boxes so that the number of
 visible boxes is as small as possible.
 
 \begin{solution}
-  We assume one box can only contain \emph{exactly} one another box.
+  We assume one box can only contain \emph{exactly} one another box, i.e.,
+  two boxes cannot be placed into the same box simultaneously.
   We reduce this problem to bipartite matching problem, and then 
   use Ford-Fulkerson algorithm to solve it.
   We construct a bipartite graph $G$ with vertex set $U \cup W$ as follows:
   \begin{itemize}
     \item Each box is a node in both $U$ and $W$.
     \item For a pair of node $u\in U$ and $v \in W$, if $u$ can be rotated so 
-      that it can be contained in $v$, we add an edge $e=(u,v)$.
+      that it can be contained in $v$, we add an edge $e=(u,v)$. 
   \end{itemize}
 
   Call two boxes are nested if one contains another.
@@ -97,20 +98,28 @@ visible boxes is as small as possible.
 
   \begin{proof}
     If we know the maximum number of nested boxes and how the boxes contain
-    each other, we can transfer to a maximum matching in $G$ as follows: 
-    if $u$ contains $v$, then we select $e=(u,v)$ in $G$, where $u\in U$ and
-    $v\in W$.  Each time we place a box into another, the number of visible
-    boxes is decreased by one.  
-    Let $|M|$ be the final number of edges selected.
-    It is maximized according to the above procedure.
-    Otherwise, there will be a better way to place the boxes. 
+    each other, we can transfer to a maximum matching in $G$ as follows: if $u$
+    contains $v$, then we select $e=(u,v)$ in $G$, where $u\in U$ and $v\in W$.
     Since each box can contain exactly one another box, this is a valid
-    matching.  Moreover, the number of the nested boxes and the size of the
-    maximum matching is $|M|$. 
+    matching.  Each time we place a box into another, the number of visible
+    boxes is decreased by one.  Let $|M|$ be the final number of edges
+    selected.  It is maximized according to the above procedure.  Otherwise,
+    if there is a matching that has larger size, 
+    there will be a better way to place the boxes.  
+    This contradicts with the assumption.
+    By contradiction, $M$ is a maximum matching.
+    Moreover, the number of the nested boxes and the size of the maximum
+    matching is $|M|$. 
 
     Conversely, if we know a maximum matching, we can find how to place the
-    boxes into each other and then get the smallest number of visible boxes.
-    If we match $u$ with $v$, then we place box $u$ into $v$.
+    boxes into each other by placing $u$ into $v$ for each $e=(u,v)$ in $M$.
+    Each $u \in U$ is matched exactly once, which means each box can be placed
+    in another box only once. Thus this is a valid solution for the problem.
+    Furthermore, this scheme must has the maximum number of nested boxes.
+    Otherwise, if there is a better way to place the box, we can transform it
+    to a matching that has a larger size. By contradiction, this is the best
+    way to place the box.
+
     Finally, the size of the maximum matching is $|M|$, and equals to the
     number of nested boxes. 
   \end{proof}
@@ -306,10 +315,10 @@ $(i, j)$ is marked.
     strategy then Paul can guarantee that he wins when $r < M$.
   \item 
     Describe a randomized strategy for Sally that guarantees that she wins with
-    probability at least $\min{r/M,1}$, no matter what strategy Paul uses.
+    probability at least $\min\{r/M,1\}$, no matter what strategy Paul uses.
   \item 
     Describe a randomized strategy for Paul that guarantees that he loses with
-    probability at most $\min{r/M,1}$, no matter what strategy Sally uses.
+    probability at most $\min\{r/M,1\}$, no matter what strategy Sally uses.
 
 \end{enumerate}
 
