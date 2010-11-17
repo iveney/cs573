@@ -141,68 +141,63 @@ reports correctly that no such rounding is possible.
 
 \begin{solution}
   We can solve this problem by reducing it to maximum flows problem 
-  with edge demands.
+  with edge demands. The capacities and demands are all integers.
   Before we do that, 
-  we first check if the sum of each row (or column)
+  we first check that if the sum of each row (or column)
   is an integer. If not, we report that no such rounding is possible. 
   This is because after rounding, the sum of each row (or column) must be an
   integer.
   
   Now we assume the sum of each row (or column) is an integer.
-  Let $R[1..m]$ be the sum of each row, and $C[1..n]$ be the sum of each column.
-  We construct a graph $G$ with vertex set $\{s,t\} \cup U \cup V \cup W$ as follows:
+  Let $R[1..m]$ be the sum of each row, and $C[1..n]$ be the sum of each
+  column.  We construct a graph $G$ with vertex set $\{s,t\} \cup U \cup V$ as
+  follows:
   \begin{itemize}
-    \item Each element $A[i][j]$ is a node $x_{ij}$ in $U$.
-    \item Each row $i$  is a node $r_i$ in $V$.
-    \item Each column $j$  is a node $c_i$ in $W$.
+    \item Each row $i$ is a node $r_i$ in $U$.
+    \item Each column $j$  is a node $c_i$ in $V$.
   \end{itemize}
 
   The edges consists of:
   \begin{itemize}
-    \item an edge $e: s \rightarrow x_{ij}$ with capacity $c(e)=\lceil x_{ij}
-      \rceil$ and demand $d(e) = \lfloor x_{ij} \rfloor$ for each $x_{ij} \in U$.  
-    \item an edge $e: x_{ij}\rightarrow r_i$ with capacity $c(e)=\infty$ and
-      demand $d(e)=0$ for each $r_i \in V$.
-    \item
-      an edge $e: x_{ij} \rightarrow c_j$ with capacity $c(e)=\infty$ and
-      demand $d(e)=0$ for each $c_i \in W$.
-    \item an edge $e: r_i \rightarrow t$ with capacity $c(e)=d(e)=R[i]$ 
-      for each $r_i \in V$.
+    \item an edge $e: s \rightarrow r_i$ with capacity $c(e)=d(e)=R[i]$
+      for each $r_i \in U$.
     \item an edge $e: c_j \rightarrow t$ with capacity $c(e)=d(e)=C[j]$ 
-      for each $c_j \in W$.
+      for each $c_j \in V$.
+    \item an edge $e: r_i \rightarrow c_j $ with capacity 
+      $c(e)=\lceil x_{ij} \rceil$ and demand $d(e) = \lfloor x_{ij} \rfloor$ 
+      for each pair of $r_i \in U$ and $c_j \in V$.  
   \end{itemize} 
 
   \begin{theorem}
     The rounding exists if and only if there is a maximum flow that saturates
-    every edge entering $t$. The rounding scheme consists of 
-    the flow values that leave from $s$.
+    every edge leaving from $s$. The rounding scheme consists of the flow
+    values of edges $r_i \rightarrow c_j$.
   \end{theorem}
   \begin{proof}
     If we know a correct rounding scheme, we can transform it to a feasible
-    flow in $G$. For each $x_{ij}=A[i][j]$, we push the same amount of flow to
-    edge $s \rightarrow x_{ij}$. Since $x_{ij}$ can only be rounded to $\lfloor
-    x_{ij} \rfloor$ or $\lceil x_{ij} \rceil$, clearly the values satisfy the
-    edge constraints of these edges.  Moreover, since this is a valid rouding
-    scheme, the sum of rows and columns will be exactly the same as the flow
-    value on edges $r_i \rightarrow t$ or $c_j \rightarrow t$, which means
-    these edges are saturated and thus it is a maximum flow.
+    maximum flow in $G$. For each $x_{ij}=A[i][j]$, we push the same amount of
+    flow to edge $r_i \rightarrow c_j$. Since this rounding scheme is correct,
+    the sum of rows and columns are correct, which means the flow conservation
+    is satisfied and the edges leaving $s$ and the edges entering $t$ are all
+    saturated.  Note that $\sum_i R[i] = \sum_j C[j]$.  Clearly, it is a
+    feasible maximum flow.
 
-    Conversely, if we have a maximum flow that saturates every edge entering
-    $t$, we can round each element $A[i][j]=f(e)$, where $e$ is the edge
-    $s\rightarrow  x_{ij}$. The flow value $f(e)$ satisfies 
-    $d(e) \leq f(e) \leq c(e)$. Thus, each entry $x_{ij}=A[i][j]$ is rounded
-    correctly to $\lfloor x_{ij} \rfloor$ or $\lceil x_{ij} \rceil$.
-    Finally, the sum of rows and columns are the same as the 
-    corresponding capacity (or demand) values in edges $r_i \rightarrow t$ and 
-    $c_j \rightarrow t$. Since all these edges are saturated, the sum of entries
-    in any row or column are unchanged.
-    Thus, it is a valid rounding scheme.
-  \end{proof}
+    Conversely, if we have a maximum flow that saturates every edge leaving
+    $s$, we can round each element $A[i][j]=f(e)$, where $e$ is the edge 
+    $r_i \rightarrow  c_j$. The flow value $f(e)$ satisfies 
+    $d(e)~\leq~f(e)~\leq~c(e)$. Moreover, the capacities and demands are all
+    integer values, which means Ford-Fulkerson will compute an integer flow.
+    Thus, each entry $x_{ij}=A[i][j]$ is rounded correctly to 
+    $\lfloor x_{ij} \rfloor$ or $\lceil x_{ij} \rceil$.  Finally, the sum of
+    rows and columns are the same as the corresponding capacity (or demand)
+    values in edges $s\rightarrow r_i $ and $c_j \rightarrow t$.  Since all
+    these edges are saturated, the sum of entries in any row or column are
+    unchanged.  Thus, it is a valid rounding scheme.  \end{proof}
 
-  Clearly, there are $O(mn)$ vertices  and $O(mn)$ edges in $G$.
+  Clearly, there are $O(m+n)$ vertices  and $O(mn)$ edges in $G$.
   Computing the sums and constructing the graph can be done in $O(mn)$ time.
   If we use Edmonds-Karp fat-pipe algorithm, we get an overall running time of 
-  $O(VE^2)=O(m^3n^3)$.
+  $O(VE^2)=O((m+n)\cdot m^2n^2)$.
 \end{solution}
 
 % ---------------------------------------------------------
