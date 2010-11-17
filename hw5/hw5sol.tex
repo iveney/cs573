@@ -185,7 +185,7 @@ reports correctly that no such rounding is possible.
     Conversely, if we have a maximum flow that saturates every edge leaving
     $s$, we can round each element $A[i][j]=f(e)$, where $e$ is the edge 
     $r_i \rightarrow  c_j$. The flow value $f(e)$ satisfies 
-    $d(e)~\leq~f(e)~\leq~c(e)$. Moreover, the capacities and demands are all
+    wireless.illinois.edu$d(e)~\leq~f(e)~\leq~c(e)$. Moreover, the capacities and demands are all
     integer values, which means Ford-Fulkerson will compute an integer flow.
     Thus, each entry $x_{ij}=A[i][j]$ is rounded correctly to 
     $\lfloor x_{ij} \rfloor$ or $\lceil x_{ij} \rceil$.  Finally, the sum of
@@ -236,17 +236,25 @@ If no such schedule exists, your algorithm should report that fact.
   \end{theorem}
 
   \begin{proof}
-    For each edge $s \rightarrow x$ for each $x \in X$, clearly it satisfies
-    both Federal lasw and individual voters' budget constraints.
-    For each edges $x \rightarrow y$, it denotes the amount that voter $x$ 
-    will send to candidate $y$ each day.
-    For each edge $y \rightarrow t$ for each $y \in Y$, it denotes the amount 
-    that every candidate must receive each day to meet the campaign
-    requirement.
-    If the maximum flow we compute saturates all the edges entering $t$,
-    then following this schedule, after $k$ days each candidate can receive 
-    exactly $M[y]$ money for all $y \in Y$.
-    Hence, the maximum flow we compute is the desired schedule.
+    Given a maximum flow computed in $G$, we can convert it to a donation
+    schedule as follows.  For each edges $x \rightarrow y$, it denotes the
+    amount that voter $x$ will send to candidate $y$ each day.  For each edge
+    $y \rightarrow t$ for each $y \in Y$, it denotes the amount that every
+    candidate must receive each day to meet the campaign requirement.  For each
+    edge $s \rightarrow x$ for each $x \in X$, clearly it satisfies both
+    Federal lasw and individual voters' budget constraints.  If the maximum
+    flow saturates all the edges entering $t$, then following this schedule,
+    after $k$ days each candidate can receive exactly $M[y]$ money for all $y
+    \in Y$.  Hence, the maximum flow we compute can be converted to a correct
+    schedule.
+
+    Conversely, if we have a correct donation schedule, we can convert it to a
+    maximum flow in $G$ by pushing the same amount of flow as $W[x][y]/k$ on
+    edge $x \rightarrow y$ for each $x\in X$ and $y\in Y$.  The donation
+    schedule is correct, hence it satisfies the constraint on edges
+    $s\rightarrow x$ for each $x \in X$.  Hence this is a feasible flow.
+    Furthermore, the schedule can meet each candidate's requirement and thus
+    all the edges entering $t$ will be saturated. Hence it is a maximum flow.
   \end{proof}
 
   The maximum flow has value at most $S=\sum_y M[y]$. There at most 
@@ -281,14 +289,49 @@ array $M[1..n,1..n]$ of booleans, where $M[i, j]$ = True if and only if cell
 $(i, j)$ is marked.
 
 \begin{solution}
-  Dynamic programming to construct the graph $G$.
-  Maximum flow with unit demand and cost on each edge.
-  $d=1$ means each node must be used.
-  $\$=1$ means the more paths are used, the more cost there will be,
-  because all flows are sent from $s$.
+  We can solve this problem by reducing it to a minimum-cost flow problem with
+  demands.
+  We construct a network $G$ as follows:
+  \begin{itemize}
+    \item For each cell $(i,j)$, we create two vertices $u_{i,j}$ and $v_{i,j}$.
+      There is an edge $e: u_{i,j} \rightarrow v_{i,j}$ with cost 0.  If
+      $M[i,j]=\mathsc{True}$, then $d(e)=1$. Otherwise $d(e)=0$.
+      $u_{1,1}$ is the source vertex. $v_{n,n}$ is the target vertex.
+    \item For each $v_{i,j}$, there are edges from $v_{i,j}$ to $u_{i+1,j}$ if
+      $i+1 \leq n$, and $u_{i,j+1}$ if $j+1 \leq n$. 
+      All of these edges have demands 0.
+      For edges $v_{1,1} \rightarrow u_{2,1}$ and $v_{1,1} \rightarrow u_{1,2}$,
+      they have cost 1. The rest has cost 0.
+  \end{itemize}
+  Let the number smallest set of monotone paths that covers every marked cell
+  be $k$.
+  \begin{theorem}
+    $k$ equals to the cost of the minimum-cost feasible flow in $G$.
+    The set of monotone paths are the corresponding directed paths in $G$.
+  \end{theorem}
   \begin{proof}
-    Minimum set of monotone paths $\rightarrow$ minimum cost flow.
+    If we know the smallest set of monotone paths, we can convert it 
+    to a feasible flow in $G$ with cost $k$ by following the corresponding
+    edges in $G$ according to the paths.
+    Since every marked cell is visited, the edges with demand 1 
+    are satisfied and thus the flow is feasible.
+    The cost must be minimum. Otherwise, if there is a feasible flow with 
+    smaller cost, we can convert it to a set of monotone paths that has 
+    smaller size.
+    
+    Conversely, if we know a minimum-cost feasible flow with cost $k$, we 
+    can convert it to a set of monotone paths.
+    Since this flow is feasible, the demands are all satisfied, which 
+    means the marked cells are all visited.
+    $k$ is minimized. Otherwise, if there is a better way to construct 
+    the set of paths, we can convert it back to find a feasible flow
+    that has smaller cost.
   \end{proof}
+
+  There are $O(n^2)$ vertices and edges in $G$. $G$ can be constructed 
+  in $O(n^2)$ time.
+  By running Sleator and Tarjan's network flow algorithm,
+  our algorithm runs in $O(VE\log V)=O(n^4 \log n)$ time.
 \end{solution}
 
 \end{enumerate}
@@ -302,18 +345,77 @@ $(i, j)$ is marked.
   \item 
     Prove that if Paul uses a deterministic strategy, and Sally knows his
     strategy, then Sally can guarantee that she wins.
+    \begin{solution}
+      Since $r$ is a positive integer, $|S|>0$. If Sally knows 
+      Paul's strategy, then she knows what path Paul will choose given 
+      $s$ and $t$. She can simply choose the edge $e=(s,u)$ in this path and 
+      win.
+    \end{solution}
+
   \item 
     Describe a deterministic strategy for Sally that guarantees that she wins
     when $r \leq M$, no matter what strategy Paul uses.
+    \begin{solution}
+      Sally can just include all the $M$ edges that across the ($s$,$t$)-cut in
+      $S$.  Imagine the path that Paul chooses as a flow from $s$ to $t$.
+      Then, it must go through one of the $M$ edge in the minimum cut.  Since
+      $S$ includes all these edges, $P \cap S$ must not be empty.
+    \end{solution}
+
   \item 
     Prove that if Sally uses a deterministic strategy, and Paul knows her
     strategy then Paul can guarantee that he wins when $r < M$.
+    \begin{solution}
+      Let $M'$ be the number of edges in an arbitrary ($s$,$t$)-cut.
+      It follows $M \leq M'$, and thus $r < M'$.
+      Thus, Sally cannot choose all the edges that $P$ can possibly go through.
+      Conversely, assume that there is no way for Paul to gurantee he wins. 
+      It implies that all the edges in one of the minimum cut are included in
+      $S$, and thus $r \geq M$. This contradicts with the $r < M$.  
+      By contradiction, Paul can gurantee he wins.  
+    \end{solution}
+
   \item 
     Describe a randomized strategy for Sally that guarantees that she wins with
     probability at least $\min\{r/M,1\}$, no matter what strategy Paul uses.
+    \begin{solution}
+      Sally can use the following strategy: choose $r$ edges uniformly at
+      random from the $M$ edges of the minimum ($s$,$t$)-cut .
+	\begin{itemize}
+	  \item $r \geq M$: Sally is essentially using the strategy in (b)
+	    and thus she wins with probability 1.
+	  \item $r < M$: No matter what strategy Paul uses, $P$ must 
+	    use one of the $M$ edges in the minimum $(s,t)$-cut. 
+	    Each of these edges will be selected with probability $1/M$ 
+	    in Sally's strategy, and there are $r$ edges will be selected.
+	    Hence, the probability that $P$ uses one of these $r$ edges 
+	    is $r/M$. In this case, Sally wins with probability at least $r/M$.
+	\end{itemize}
+	In conclusion, Sally wins with probability at least $\min\{r/M,1\}$
+	when using the above strategy.
+    \end{solution}
   \item 
     Describe a randomized strategy for Paul that guarantees that he loses with
     probability at most $\min\{r/M,1\}$, no matter what strategy Sally uses.
+    \begin{solution}
+      Paul can use the following strategy: choose a path that uses an edge
+      from the $M$ edges of the minimum ($s$,$t$)-cut uniformly at random.
+	\begin{itemize}
+	  \item $r \geq M$: Sally is essentially using the strategy in (b)
+	    and thus Paul loses with probability 1.
+	  \item $r < M$: No matter what strategy Sally uses, $P$ must 
+	    use one of the $M$ edges in the minimum $(s,t)$-cut. 
+	    Each of these edges will be selected with probability $1/M$ 
+	    in Paul's strategy, in which there are at most $r$ edges 
+	    will be selected by Sally.
+	    Hence, the probability that $P$ uses an edge that is in $S$
+	    is $r/M$. 
+	    In this case, Paul loses with probability at most $r/M$.
+	\end{itemize}
+	In conclusion, Paul loses with probability at most $\min\{r/M,1\}$
+	when using the above strategy.
+    \end{solution}
+
 
 \end{enumerate}
 
