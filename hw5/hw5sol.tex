@@ -303,7 +303,7 @@ $(i, j)$ is marked.
       For edges $v_{1,1} \rightarrow u_{2,1}$ and $v_{1,1} \rightarrow u_{1,2}$,
       they have cost 1. The rest has cost 0.
   \end{itemize}
-  Let the number smallest set of monotone paths that covers every marked cell
+  Let the number of smallest set of monotone paths that covers every marked cell
   be $k$.
   \begin{theorem}
     $k$ equals to the cost of the minimum-cost feasible flow in $G$.
@@ -379,43 +379,72 @@ $(i, j)$ is marked.
     Describe a randomized strategy for Sally that guarantees that she wins with
     probability at least $\min\{r/M,1\}$, no matter what strategy Paul uses.
     \begin{solution}
-      Sally can use the following strategy: choose $r$ edges uniformly at
-      random from the $M$ edges of the minimum ($s$,$t$)-cut .
-	\begin{itemize}
-	  \item $r \geq M$: Sally is essentially using the strategy in (b)
-	    and thus she wins with probability 1.
-	  \item $r < M$: No matter what strategy Paul uses, $P$ must 
-	    use one of the $M$ edges in the minimum $(s,t)$-cut. 
-	    Each of these edges will be selected with probability $1/M$ 
-	    in Sally's strategy, and there are $r$ edges will be selected.
-	    Hence, the probability that $P$ uses one of these $r$ edges 
-	    is $r/M$. In this case, Sally wins with probability at least $r/M$.
-	\end{itemize}
-	In conclusion, Sally wins with probability at least $\min\{r/M,1\}$
-	when using the above strategy.
+      Suppose each edge is chosen independently and uniformly. The randomized
+strategy for Sally is to randomly choose a subset $S$ of $r$ edges in the
+minimum ($s, t$)-cut. Note if $r \ge M$, Sally chooses $M$ edges in the minimum
+cut, i.e. all edges in the minimum cut are chosen by Sally.
+\begin{itemize}
+\item If $r \ge M$, $S$ contains all edges in the minimum cut. According to
+  (b), the probability that Sally wins is 1.
+\item If $r < M$, Sally has to choose at least one edge in $P$ to win. $P$ must
+  contain at least one edge in the minimum cut. We first consider only one edge
+  in the minimum cut is contained in $P$. Besides choosing the edge contained
+  in $P$, Sally have to choose $r-1$ edges in other $M-1$ edges, so  the
+  probability is
+\[
+\frac{\left(^{M-1}_{r-1}\right)}{\left(^M_r\right)} = \frac{r}{M}
+\] 
+Since $P$ contains at least one edge in the minimum cut, the probability that
+the edges that Sally chooses are contained in $P$ is at least $r/M$. So when $r
+< M$, the probability that Sally wins is at least $r/M$.
+\end{itemize}
+Thus, based on the two items above, the probability that Sally wins is at least
+$\min$\{$r/M$, 1\}.
+
     \end{solution}
   \item 
     Describe a randomized strategy for Paul that guarantees that he loses with
     probability at most $\min\{r/M,1\}$, no matter what strategy Sally uses.
     \begin{solution}
-      Paul can use the following strategy: choose a path that uses an edge
-      from the $M$ edges of the minimum ($s$,$t$)-cut uniformly at random.
-	\begin{itemize}
-	  \item $r \geq M$: Sally is essentially using the strategy in (b)
-	    and thus Paul loses with probability 1.
-	  \item $r < M$: No matter what strategy Sally uses, $P$ must 
-	    use one of the $M$ edges in the minimum $(s,t)$-cut. 
-	    Each of these edges will be selected with probability $1/M$ 
-	    in Paul's strategy, in which there are at most $r$ edges 
-	    will be selected by Sally.
-	    Hence, the probability that $P$ uses an edge that is in $S$
-	    is $r/M$. 
-	    In this case, Paul loses with probability at most $r/M$.
-	\end{itemize}
-	In conclusion, Paul loses with probability at most $\min\{r/M,1\}$
-	when using the above strategy.
-    \end{solution}
+Suppose each edge is chosen independently and uniformly. The randomized
+strategy for Paul is to first randomly select an edge $e$ in the 
+minimum ($s, t$)-cut, and then choose a path which passes $e$ among the maximum
+flow network. 
 
+The largest probability that Paul loses is when Sally uses her best strategy to
+win. In the following, we will compute the probability that Sally uses her best
+strategy to win. 
+
+\begin{itemize}
+\item If $r \ge M$, the largest probability that Paul loses is 1 since no
+  matter which edge $e$ Paul selects, Sally can choose all edges in the minimum
+  cut. So the probability that Paul loses is at most 1.
+\item If $r < M$, the edge $e$ has to be chosen by Sally so that Paul loses.
+  The probability that edge $e$ is chosen when Sally chooses $r$ edges in the
+  minimum cut is $r/M$ (according to the results of (d)). We can partition
+  edges in $G$ into a subset of cuts. If an edge can be partitioned into more
+  than one cuts, just partition it into any one of the cuts. Suppose $G$ can be
+  partitioned into $n$ cuts, where the number of edges in the $n$ cuts is
+  $M_1$, $M_2$, $\dots$, $M_n$, respectively. Let $r_1, r_2, \dots, r_n$ be the
+  number of edges that Sally chooses in the $n$ respective cuts. So the
+  possibility that Sally chooses at least one edges of $P$ in $G$ is
+\begin{align*}
+\textrm{Pr[Sally wins]} &\le \frac{r_1}{M_1} + \frac{r_2}{M_2} + \dots +
+\frac{r_n}{M_n}
+~~~~~~&(\mbox{since $M_1, M_2, \dots, M_n \le M$}) \\
+&\le \frac{r_1 + r_2 + \dots + r_n}{M} 
+~~~~~~&(\mbox{since $r_1 + r_2 + \cdots + r_n = r$}) \\
+&= \frac{r}{M}
+\end{align*}
+
+Since $r/M$ is the probability that Sally wins by using her best strategy,
+$r/M$ is the largest probability that Paul loses. So the probability that Paul
+loses is at most $r/M$.
+\end{itemize}
+Thus, based on the two items above, the probability that Paul loses is at most
+$\min$\{$r/M$, 1\}.
+
+    \end{solution}
 
 \end{enumerate}
 
