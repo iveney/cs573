@@ -409,7 +409,7 @@ $\min$\{$r/M$, 1\}.
 Suppose each edge is chosen independently and uniformly. The randomized
 strategy for Paul is to first randomly select an edge $e$ in the 
 minimum ($s, t$)-cut, and then choose a path which passes $e$ among the maximum
-flow network. 
+flow. 
 
 The largest probability that Paul loses is when Sally uses her best strategy to
 win. In the following, we will compute the probability that Sally uses her best
@@ -422,7 +422,8 @@ strategy to win.
 \item If $r < M$, the edge $e$ has to be chosen by Sally so that Paul loses.
   The probability that edge $e$ is chosen when Sally chooses $r$ edges in the
   minimum cut is $r/M$ (according to the results of (d)). We can partition
-  edges in $G$ into a subset of cuts. If an edge can be partitioned into more
+  edges in $G$ into a set of cuts such that each cut has at most one edge in
+  $P$. If an edge can be partitioned into more
   than one cuts, just partition it into any one of the cuts. Suppose $G$ can be
   partitioned into $n$ cuts, where the number of edges in the $n$ cuts is
   $M_1$, $M_2$, $\dots$, $M_n$, respectively. Let $r_1, r_2, \dots, r_n$ be the
